@@ -47,7 +47,8 @@ if($text=="/start"||$text=="منو اصلی") {
 
                 array('دادن امتیاز',"ثبت نام نموده در مسابقات"),
                
-                array('اضافه کردن ساعت کاری')
+                array('اضافه کردن ساعت کاری',"ثبت نام کرده در ربات"),
+                array("ثبت نام کرده در مسابقات بدون پرداخت")
               
 
             )
@@ -69,12 +70,63 @@ if($text=="/start"||$text=="منو اصلی") {
     }elseif ($text=="ثبت نام نموده در مسابقات"){
     $db = Db::getInstance();
 
-    $member_t=$db->query("SELECT sabtenam.first_name, sabtenam.mobile FROM tour INNER JOIN sabtenam ON tour.user_id = sabtenam.user_id where pes=1 OR fifa=1");
+    $member_t=$db->query("SELECT sabtenam.first_name, sabtenam.mobile,tour.fifa FROM tour INNER JOIN sabtenam ON tour.user_id = sabtenam.user_id where (pes=1 OR fifa=1) AND pay=1");
 
     $user_tour="";
     $user_tour_mobile="";
     for ($x = 0; $x <= count($member_t); $x++) {
-        $user_tour=$user_tour."\n".$member_t[$x]['first_name']." \n ".$member_t[$x]['mobile']."\n"."--------------------";
+       if($member_t[$x]['fifa']==1) {
+           $user_tour = "f " . $user_tour . "\n" . $member_t[$x]['first_name'] . " \n " . $member_t[$x]['mobile'] . "\n" . "--------------------";
+       }else{
+           $user_tour = "p " . $user_tour . "\n" . $member_t[$x]['first_name'] . " \n " . $member_t[$x]['mobile'] . "\n" . "--------------------";
+
+       }
+    }
+    MessageRequestJson("sendMessage", array('chat_id' =>$chat_id,'text'=>$user_tour."\n".$user_tour_mobile,'reply_markup' => array(resize_keyboard =>true,
+
+        "keyboard"=>array(
+
+            array('منو اصلی')
+        )
+
+    )));
+
+}elseif ($text=="ثبت نام کرده در مسابقات بدون پرداخت"){
+    $db = Db::getInstance();
+
+    $member_t=$db->query("SELECT sabtenam.first_name, sabtenam.mobile,tour.fifa FROM tour INNER JOIN sabtenam ON tour.user_id = sabtenam.user_id where (pes=1 OR fifa=1) AND pay is null ");
+
+    $user_tour="";
+    $user_tour_mobile="";
+    for ($x = 0; $x <= count($member_t); $x++) {
+       if($member_t[$x]['fifa']==1) {
+           $user_tour = "f " . $user_tour . "\n" . $member_t[$x]['first_name'] . " \n " . $member_t[$x]['mobile'] . "\n" . "--------------------";
+       }else{
+           $user_tour = "p " . $user_tour . "\n" . $member_t[$x]['first_name'] . " \n " . $member_t[$x]['mobile'] . "\n" . "--------------------";
+
+       }
+    }
+    MessageRequestJson("sendMessage", array('chat_id' =>$chat_id,'text'=>$user_tour."\n".$user_tour_mobile,'reply_markup' => array(resize_keyboard =>true,
+
+        "keyboard"=>array(
+
+            array('منو اصلی')
+        )
+
+    )));
+
+}elseif ($text=="ثبت نام کرده در ربات"){
+    $db = Db::getInstance();
+
+    $member_t=$db->query("SELECT `username`,`first_name`,`mobile` FROM `sabtenam` WHERE `comp`=1; ");
+
+    $user_tour="";
+    $user_tour_mobile="";
+    for ($x = 0; $x <= count($member_t); $x++) {
+
+           $user_tour = "f " . $user_tour . "\n" . $member_t[$x]['first_name'] . " \n " . $member_t[$x]['mobile'] . "\n" ."@". $member_t[$x]['username'] . "\n" . "--------------------";
+
+
 
     }
     MessageRequestJson("sendMessage", array('chat_id' =>$chat_id,'text'=>$user_tour."\n".$user_tour_mobile,'reply_markup' => array(resize_keyboard =>true,
@@ -85,5 +137,6 @@ if($text=="/start"||$text=="منو اصلی") {
         )
 
     )));
+
 }
 ?>
